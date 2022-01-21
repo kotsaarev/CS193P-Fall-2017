@@ -190,3 +190,9 @@ extension CGPoint {
         return CGPoint(x: x+dx, y: y+dy)
     }
 }
+
+extension CGFloat {
+    var arc4random: CGFloat {
+        return self * (CGFloat(arc4random_uniform(UInt32.max))/CGFloat(UInt32.max))
+    }
+}

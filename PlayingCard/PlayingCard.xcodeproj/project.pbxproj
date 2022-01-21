@@ -15,6 +15,7 @@
 		050479482796AC640099C309 /* PlayingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050479472796AC640099C309 /* PlayingCard.swift */; };
 		0504794A2796AFF70099C309 /* PlayingCardDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050479492796AFF70099C309 /* PlayingCardDeck.swift */; };
 		0504794C2797CD9D0099C309 /* PlayingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0504794B2797CD9D0099C309 /* PlayingCardView.swift */; };
+		056091D0279A9EC5004A2269 /* CardBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056091CF279A9EC5004A2269 /* CardBehavior.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		050479472796AC640099C309 /* PlayingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayingCard.swift; sourceTree = "<group>"; };
 		050479492796AFF70099C309 /* PlayingCardDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayingCardDeck.swift; sourceTree = "<group>"; };
 		0504794B2797CD9D0099C309 /* PlayingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayingCardView.swift; sourceTree = "<group>"; };
+		056091CF279A9EC5004A2269 /* CardBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardBehavior.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,11 +63,10 @@
 			isa = PBXGroup;
 			children = (
 				050479362796AAE30099C309 /* ViewController.swift */,
-				0504794B2797CD9D0099C309 /* PlayingCardView.swift */,
+				056091CF279A9EC5004A2269 /* CardBehavior.swift */,
 				050479382796AAE30099C309 /* Main.storyboard */,
-				050479472796AC640099C309 /* PlayingCard.swift */,
-				050479492796AFF70099C309 /* PlayingCardDeck.swift */,
 				0504793B2796AAE80099C309 /* Assets.xcassets */,
+				056091D1279A9ED6004A2269 /* PlayingCard */,
 				050479462796AC090099C309 /* Supporting Files */,
 				050479402796AAE80099C309 /* Info.plist */,
 			);
@@ -79,6 +80,16 @@
 				0504793D2796AAE80099C309 /* LaunchScreen.storyboard */,
 			);
 			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		056091D1279A9ED6004A2269 /* PlayingCard */ = {
+			isa = PBXGroup;
+			children = (
+				0504794B2797CD9D0099C309 /* PlayingCardView.swift */,
+				050479472796AC640099C309 /* PlayingCard.swift */,
+				050479492796AFF70099C309 /* PlayingCardDeck.swift */,
+			);
+			path = PlayingCard;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -156,6 +167,7 @@
 				050479482796AC640099C309 /* PlayingCard.swift in Sources */,
 				0504794C2797CD9D0099C309 /* PlayingCardView.swift in Sources */,
 				050479332796AAE30099C309 /* AppDelegate.swift in Sources */,
+				056091D0279A9EC5004A2269 /* CardBehavior.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
