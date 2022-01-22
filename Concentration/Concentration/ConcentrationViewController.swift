@@ -7,27 +7,28 @@
 
 import UIKit
 
-class ConcentrationViewController: UIViewController
+class ConcentrationViewController: VCLLoggingViewController
 {
+    override var vclLoggingName: String {
+        return "Game"
+    }
+    
     private lazy var game: Concentration = 
         Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
     
-    var numberOfPairsOfCards: Int {
-        return (cardButtons.count+1) / 2
-    }
+    var numberOfPairsOfCards: Int { return (cardButtons.count+1) / 2 }
     
-    private(set) var flipCount = 0 { 
-        didSet {
-            updateFlipCountLabel()
-        }
-    }
+    private(set) var flipCount = 0 { didSet { updateFlipCountLabel() } }
     
     private func updateFlipCountLabel() {
         let attributes: [NSAttributedString.Key:Any] = [
             .strokeWidth : 5.0,
             .strokeColor: #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
         ]
-        let attributedString = NSAttributedString(string: "Flips: \(flipCount)", attributes: attributes)
+        let attributedString = NSAttributedString(
+            string: "Flips: \(flipCount)",
+            attributes: attributes
+        )
         flipCountLabel.attributedText = attributedString
     }
     
