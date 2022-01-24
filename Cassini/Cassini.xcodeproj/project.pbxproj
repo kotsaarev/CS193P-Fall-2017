@@ -13,6 +13,7 @@
 		056091ED279BD20A004A2269 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 056091EB279BD20A004A2269 /* LaunchScreen.storyboard */; };
 		056091F6279BD321004A2269 /* ImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056091F5279BD321004A2269 /* ImageViewController.swift */; };
 		056091F8279BD78B004A2269 /* DemoURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056091F7279BD78B004A2269 /* DemoURLs.swift */; };
+		056091FA279E761F004A2269 /* CassiniViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056091F9279E761E004A2269 /* CassiniViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		056091EE279BD20A004A2269 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		056091F5279BD321004A2269 /* ImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewController.swift; sourceTree = "<group>"; };
 		056091F7279BD78B004A2269 /* DemoURLs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoURLs.swift; sourceTree = "<group>"; };
+		056091F9279E761E004A2269 /* CassiniViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CassiniViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +58,7 @@
 		056091DF279BD206004A2269 /* Cassini */ = {
 			isa = PBXGroup;
 			children = (
+				056091F9279E761E004A2269 /* CassiniViewController.swift */,
 				056091E6279BD206004A2269 /* Main.storyboard */,
 				056091F5279BD321004A2269 /* ImageViewController.swift */,
 				056091F7279BD78B004A2269 /* DemoURLs.swift */,
@@ -148,6 +151,7 @@
 				056091F6279BD321004A2269 /* ImageViewController.swift in Sources */,
 				056091E1279BD206004A2269 /* AppDelegate.swift in Sources */,
 				056091F8279BD78B004A2269 /* DemoURLs.swift in Sources */,
+				056091FA279E761F004A2269 /* CassiniViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
