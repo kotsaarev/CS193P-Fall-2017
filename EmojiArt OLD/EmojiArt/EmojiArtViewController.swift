@@ -50,31 +50,37 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         }
     }
     
-    var document: EmojiArtDocument?
-    
-    @IBAction func save(_ sender: UIBarButtonItem? = nil) {
-        document?.emojiArt = emojiArt
-        if document?.emojiArt != nil {
-            document?.updateChangeCount(.done)
-        }
-    }
-    
-    @IBAction func close(_ sender: UIBarButtonItem) {
-        save()
-        if document?.emojiArt != nil {
-            document?.thumbnail = emojiArtView.snapshot
-        }
-        dismiss(animated: true) {
-            self.document?.close()
+    @IBAction func save(_ sender: UIBarButtonItem) {
+        if let json = emojiArt?.json {
+            if var url = try? FileManager.default.url(
+                for: .documentDirectory, 
+                in: .userDomainMask, 
+                appropriateFor: nil, 
+                create: true
+            ) {
+                url.appendPathComponent("Untitled.json")
+                do {
+                    try json.write(to: url)
+                    print("saved successfully!")
+                } catch let error {
+                    print("couldn't save \(error)")
+                }
+            }
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        document?.open { success in
-            if success {
-                self.title = self.document?.localizedName
-                self.emojiArt = self.document?.emojiArt
+        
+        if var url = try? FileManager.default.url(
+            for: .documentDirectory, 
+            in: .userDomainMask, 
+            appropriateFor: nil, 
+            create: true
+        ) {
+            url.appendPathComponent("Untitled.json")
+            if let jsonData = try? Data(contentsOf: url) {
+                emojiArt = EmojiArt(json: jsonData)
             }
         }
     }
@@ -141,12 +147,7 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
             emojiCollectionView.delegate = self
             emojiCollectionView.dragDelegate = self
             emojiCollectionView.dropDelegate = self
-            emojiCollectionView.dragInteractionEnabled = true
         }
-    }
-    
-    private var font: UIFont {
-        return UIFontMetrics(forTextStyle: .body).scaledFont(for: UIFont.preferredFont(forTextStyle: .body).withSize(64.0))
     }
     
     private var addingEmoji = false
@@ -168,6 +169,10 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         case 1: return emojis.count
         default: return 0
         }
+    }
+    
+    private var font: UIFont {
+        return UIFontMetrics(forTextStyle: .body).scaledFont(for: UIFont.preferredFont(forTextStyle: .body).withSize(64.0))
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
