@@ -99,6 +99,11 @@ extension EmojiArtView
             if let view = recognizer.view, let index = subviews.firstIndex(of: view) {
                 selectedSubview = view
                 exchangeSubview(at: 0, withSubviewAt: index)
+                // would be nice to observe this change via KVO too
+                // could "fake it" by setting center to its existing value here?
+                // a little too much hackery :)
+                delegate?.emojiArtViewDidChange(self)
+                NotificationCenter.default.post(name: .EmojiArtViewDidChange, object: self)
             }
         }
     }

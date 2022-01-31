@@ -22,7 +22,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
                 appropriateFor: nil, 
                 create: true
             )
-            template?.appendPathComponent("Untitled.json")
+            template?.appendPathComponent("Untitled.emojiart")
             if template != nil {
                 allowsDocumentCreation = FileManager.default.createFile(atPath: template!.path, contents: Data())
             }

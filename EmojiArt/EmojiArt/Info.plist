@@ -10,14 +10,14 @@
 			<key>CFBundleTypeIconFiles</key>
 			<array/>
 			<key>CFBundleTypeName</key>
-			<string>JSON</string>
+			<string>EmojiArt</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>public.json</string>
+				<string>edu.stanford.cs193p.emojiart</string>
 			</array>
 		</dict>
 	</array>
