@@ -6,26 +6,76 @@
 //
 
 import UIKit
+import MobileCoreServices
 
-class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScrollViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDragDelegate, UICollectionViewDropDelegate, UIPopoverPresentationControllerDelegate
+class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScrollViewDelegate, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDragDelegate, UICollectionViewDropDelegate, UIPopoverPresentationControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate
 {
+    // MARK: - Camera
+    
+    @IBOutlet weak var cameraButton: UIBarButtonItem! {
+        didSet {
+            cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
+        }
+    }
+    
+    @IBAction func takeBackgroundPhoto(_ sender: UIBarButtonItem) {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.mediaTypes = [kUTTypeImage as String]
+        picker.allowsEditing = true
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.presentingViewController?.dismiss(animated: true)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = ((info[UIImagePickerController.InfoKey.editedImage] ?? info[UIImagePickerController.InfoKey.originalImage]) as? UIImage)?.scaled(by: 0.25) {
+//            let url = image.storeLocallyAsJPEG(named: String(Date.timeIntervalSinceReferenceDate))
+            if let imageData = image.jpegData(compressionQuality: 1.0) {
+                emojiArtBackgroundImage = .local(imageData, image)
+                documentChanged()
+            } else {
+                // TODO: alert user of bad camera input
+            }
+        }
+        picker.presentingViewController?.dismiss(animated: true)
+    }
+    
     // MARK: - Navigation
+    
+    // here we prepare both for our Modal and Popover segues
+    // and for our Embed Segue
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "Show Document Info" {
             if let destination = segue.destination.contents as? DocumentInfoViewController {
                 document?.thumbnail = emojiArtView.snapshot
                 destination.document = document
+                // if we're in a popover set ourselves as the delegate
+                // so we can control the adaptation behavior to compact environments
                 if let ppc = destination.popoverPresentationController {
                     ppc.delegate = self
+                    // we could do other popover configuration here too
                 }
             }
         } else if segue.identifier == "Embed Document Info" {
+            // just grab onto the MVC so we can update it later
             embeddedDocInfo = segue.destination.contents as? DocumentInfoViewController
         }
     }
     
-    private var embeddedDocInfo: DocumentInfoViewController?
+    // a Popover Segue adapts by default in horizontally compact environments
+    // but we don't actually want that for our small popover
+    // so we set the UIPopoverPresentantionController's delegate
+    // to ourself in prepare(for segue:)
+    // then implement this delegate method which returns
+    // that the adaptaion style it should use is always .none
+    // (i.e. never adapt)
+    // if we wanted to, we could have looked at the traitCollection
+    // to see what environment is being adapted to and made a decision from there
     
     func adaptivePresentationStyle(
         for controller: UIPresentationController,
@@ -34,9 +84,27 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         return .none
     }
     
+    // we allow view controllers that we've presented
+    // to dismiss themselves by using Unwind Segue back to us
+    // which will also close the document
+    // the view controller we're unwinding from
+    // is available in bySegue source
+    // (we don't happen to need it, but we if we did ...)
+    
     @IBAction func close(bySegue: UIStoryboardSegue) {
         close()
     }
+    
+    // we grab ahold of our embedded DocumentInfoViewController
+    // during the prepare for that Embed Segue
+    // we then keep it up to date as our document changes
+    
+    private var embeddedDocInfo: DocumentInfoViewController?
+    
+    // these layout constraints
+    // allow us size our embedded DocumentInfoViewController
+    // to its preferredContentSize
+    // (see viewWillAppear below)
     
     @IBOutlet weak var embeddedDocInfoWidth: NSLayoutConstraint!
     @IBOutlet weak var embeddedDocInfoHeight: NSLayoutConstraint!
@@ -45,24 +113,41 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
     
     var emojiArt: EmojiArt? {
         get {
-            if let url = emojiArtBackgroundImage.url {
+            if let imageSource = emojiArtBackgroundImage {
                 let emojis = emojiArtView.subviews.compactMap { $0 as? UILabel }.compactMap { EmojiArt.EmojiInfo(label: $0) }
-                return EmojiArt(url: url, emojis: emojis)
+                switch imageSource {
+                case .remote(let url, _): return EmojiArt(url: url, emojis: emojis)
+                case .local(let imageData, _): return EmojiArt(imageData: imageData, emojis: emojis)
+                }
             }
             return nil
         }
         set {
-            emojiArtBackgroundImage = (nil, nil)
+            emojiArtBackgroundImage = nil
             emojiArtView.subviews.compactMap { $0 as? UILabel }.forEach { $0.removeFromSuperview() }
+            let imageData = newValue?.imageData
+            let image = (imageData != nil) ? UIImage(data: imageData!) : nil
             if let url = newValue?.url {
-                imageFetcher = ImageFetcher(fetch: url) { (url, image) in
+                imageFetcher = ImageFetcher() { (url, image) in
                     DispatchQueue.main.async {
-                        self.emojiArtBackgroundImage = (url, image)
+                        if image == self.imageFetcher.backup {
+                            self.emojiArtBackgroundImage = .local(imageData!, image)
+                        } else {
+                            self.emojiArtBackgroundImage = .remote(url, image)
+                        }
                         newValue?.emojis.forEach {
                             let attributedText = $0.text.attributedString(withTextStyle: .body, ofSize: CGFloat($0.size))
                             self.emojiArtView.addLabel(with: attributedText, centeredAt: CGPoint(x: $0.x, y: $0.y))
                         }
                     }
+                }
+                imageFetcher.backup = image
+                imageFetcher.fetch(url)
+            } else if image != nil {
+                emojiArtBackgroundImage = .local(imageData!, image!)
+                newValue?.emojis.forEach {
+                    let attributedText = $0.text.attributedString(withTextStyle: .body, ofSize: CGFloat($0.size))
+                    self.emojiArtView.addLabel(with: attributedText, centeredAt: CGPoint(x: $0.x, y: $0.y))
                 }
             }
         }
@@ -101,31 +186,37 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        documentObserver = NotificationCenter.default.addObserver(
-            forName: UIDocument.stateChangedNotification,
-            object: document,
-            queue: OperationQueue.main,
-            using: { notification in
-                print("document changed to \(self.document!.documentState)")
-                if self.document!.documentState == .normal, let docInfoVC = self.embeddedDocInfo {
-                    docInfoVC.document = self.document
-                    self.embeddedDocInfoWidth.constant = docInfoVC.preferredContentSize.width
-                    self.embeddedDocInfoHeight.constant = docInfoVC.preferredContentSize.height
-                }
-            }
-        )
-        document?.open { success in
-            if success {
-                self.title = self.document?.localizedName
-                self.emojiArt = self.document?.emojiArt
-                self.emojiArtViewObserver = NotificationCenter.default.addObserver(
-                    forName: .EmojiArtViewDidChange, 
-                    object: self.emojiArtView, 
-                    queue: OperationQueue.main, 
-                    using: { notification in
-                        self.documentChanged()
+        if document?.documentState != .normal {
+            documentObserver = NotificationCenter.default.addObserver(
+                forName: UIDocument.stateChangedNotification,
+                object: document,
+                queue: OperationQueue.main,
+                using: { notification in
+                    print("document changed to \(self.document!.documentState)")
+                    // if the document state changes to .normal
+                    // (either because we just opened it or it finished autosaving)
+                    // update the document in our embedded DocumentInfoViewController
+                    // and also resize it to its preferredContentSize
+                    if self.document!.documentState == .normal, let docInfoVC = self.embeddedDocInfo {
+                        docInfoVC.document = self.document
+                        self.embeddedDocInfoWidth.constant = docInfoVC.preferredContentSize.width
+                        self.embeddedDocInfoHeight.constant = docInfoVC.preferredContentSize.height
                     }
-                )
+                }
+            )
+            document?.open { success in
+                if success {
+                    self.title = self.document?.localizedName
+                    self.emojiArt = self.document?.emojiArt
+                    self.emojiArtViewObserver = NotificationCenter.default.addObserver(
+                        forName: .EmojiArtViewDidChange, 
+                        object: self.emojiArtView, 
+                        queue: OperationQueue.main, 
+                        using: { notification in
+                            self.documentChanged()
+                        }
+                    )
+                }
             }
         }
     }
@@ -161,17 +252,25 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
     
     // MARK: - Emoji Art View
     
-    var emojiArtView = EmojiArtView()
+    lazy var emojiArtView = EmojiArtView()
     
-    var emojiArtBackgroundImage: (url: URL?, image: UIImage?) {
-        get {
-            return (_emojiArtBackgroundImageURL, emojiArtView.backgroundImage)
+    enum ImageSource {
+        case remote(URL, UIImage)
+        case local(Data, UIImage)
+        
+        var image: UIImage {
+            switch self {
+            case .remote(_, let image): return image
+            case .local(_, let image): return image
+            }
         }
-        set {
-            _emojiArtBackgroundImageURL = newValue.url
+    }
+    
+    var emojiArtBackgroundImage: ImageSource? {
+        didSet {
             scrollView?.zoomScale = 1.0
-            emojiArtView.backgroundImage = newValue.image
-            let size = newValue.image?.size ?? CGSize.zero
+            emojiArtView.backgroundImage = emojiArtBackgroundImage?.image
+            let size = emojiArtBackgroundImage?.image.size ?? CGSize.zero
             emojiArtView.frame = CGRect(origin: CGPoint.zero, size: size)
             scrollView?.contentSize = size
             scrollViewHeight?.constant = size.height
@@ -181,8 +280,6 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
             }
         }
     }
-    
-    private var _emojiArtBackgroundImageURL: URL?
     
     // MARK: - Emoji Collection View
     
@@ -349,8 +446,6 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         return UIDropProposal(operation: .copy)
     }
     
-    var imageFetcher: ImageFetcher!
-    
     private var suppressBadURLWarnings = false
     
     private func presentBadURLWarning(for url: URL?) {
@@ -378,29 +473,26 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         }
     }
     
+    var imageFetcher: ImageFetcher!
+    
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         imageFetcher = ImageFetcher() { (url, image) in
             DispatchQueue.main.async {
-                self.emojiArtBackgroundImage = (url, image)
+                if image == self.imageFetcher.backup {
+                    if let imageData = image.jpegData(compressionQuality: 1.0) {
+                        self.emojiArtBackgroundImage = .local(imageData, image)
+                        self.documentChanged()
+                    } else {
+                        self.presentBadURLWarning(for: url)
+                    }
+                }
+                self.emojiArtBackgroundImage = .remote(url, image)
                 self.documentChanged()
             }
         }
-        
         session.loadObjects(ofClass: NSURL.self) { nsurls in
             if let url = nsurls.first as? URL {
-//                self.imageFetcher.fetch(url)
-                DispatchQueue.global(qos: .userInitiated).async {
-                    if let imageData = try? Data(contentsOf: url.imageURL), let image = UIImage(data: imageData) {
-                        DispatchQueue.main.async {
-                            self.emojiArtBackgroundImage = (url, image)
-                            self.documentChanged()
-                        }
-                    } else {
-                        DispatchQueue.main.async {
-                            self.presentBadURLWarning(for: url)
-                        }
-                    }
-                }
+                self.imageFetcher.fetch(url)
             }
         }
         session.loadObjects(ofClass: UIImage.self) { images in

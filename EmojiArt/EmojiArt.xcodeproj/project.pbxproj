@@ -73,10 +73,9 @@
 			isa = PBXGroup;
 			children = (
 				05701C2D27A3DABF00A77F5C /* Main.storyboard */,
-				05701C6627A7AF7E00A77F5C /* DocumentInfoViewController.swift */,
 				05701C5827A3E2A800A77F5C /* EmojiArtViewController.swift */,
-				05701C5E27A3E2A800A77F5C /* EmojiArtView.swift */,
-				05701C5A27A3E2A800A77F5C /* EmojiArtView+Gestures.swift */,
+				05701C5C27A3E2A800A77F5C /* EmojiArt.swift */,
+				05701C5D27A3E2A800A77F5C /* Utilities.swift */,
 				05701C3B27A3DAFB00A77F5C /* SupportingFiles */,
 				05701C3527A3DAC300A77F5C /* Info.plist */,
 			);
@@ -86,12 +85,13 @@
 		05701C3B27A3DAFB00A77F5C /* SupportingFiles */ = {
 			isa = PBXGroup;
 			children = (
+				05701C6627A7AF7E00A77F5C /* DocumentInfoViewController.swift */,
 				05701C2727A3DABF00A77F5C /* DocumentBrowserViewController.swift */,
+				05701C5A27A3E2A800A77F5C /* EmojiArtView+Gestures.swift */,
 				05701C2B27A3DABF00A77F5C /* EmojiArtDocument.swift */,
-				05701C5C27A3E2A800A77F5C /* EmojiArt.swift */,
+				05701C5E27A3E2A800A77F5C /* EmojiArtView.swift */,
 				05701C5927A3E2A800A77F5C /* EmojiCollectionViewCell.swift */,
 				05701C5B27A3E2A800A77F5C /* TextFieldCollectionViewCell.swift */,
-				05701C5D27A3E2A800A77F5C /* Utilities.swift */,
 				05701C2527A3DABF00A77F5C /* AppDelegate.swift */,
 				05701C3027A3DAC300A77F5C /* Assets.xcassets */,
 				05701C3227A3DAC300A77F5C /* LaunchScreen.storyboard */,
